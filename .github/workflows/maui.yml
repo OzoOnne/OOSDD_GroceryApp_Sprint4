@@ -41,3 +41,6 @@ jobs:
       
       - name: Build app
         run: dotnet build Grocery.App/Grocery.App.csproj -f net8.0-android --configuration Release --no-restore
+        
+      - name: Voer unit tests uit
+        run: dotnet test --configuration Release --verbosity normal
