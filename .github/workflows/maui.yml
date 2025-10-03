@@ -1,4 +1,4 @@
-name: MAUI Unit Tests
+name: MAUI CI
 
 on:
   push:
@@ -10,8 +10,7 @@ jobs:
   test:
     runs-on: ubuntu-latest
     steps:
-      - name: Haal de repository op
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
       - name: Cache NuGet packages
         uses: actions/cache@v4
@@ -21,38 +20,30 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-nuget-
 
-      - name: Installeer .NET SDK
-        uses: actions/setup-dotnet@v3
+      - uses: actions/setup-dotnet@v3
         with:
           dotnet-version: '8.0.x'
 
-      - name: Herstel afhankelijkheden
+      - name: Restore dependencies
         run: dotnet restore
 
       - name: Run unit tests
         run: dotnet test TestCore/TestCore.csproj -c Release --no-restore --verbosity normal
 
-  build-app:
-    runs-on: ubuntu-latest
+  build-android:
+    runs-on: windows-latest   # belangrijk!
     steps:
-      - name: Haal de repository op
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
-      - name: Cache NuGet packages
-        uses: actions/cache@v4
-        with:
-          path: ~/.nuget/packages
-          key: ${{ runner.os }}-nuget-${{ hashFiles('**/*.csproj') }}
-          restore-keys: |
-            ${{ runner.os }}-nuget-
-
-      - name: Installeer .NET SDK
-        uses: actions/setup-dotnet@v3
+      - uses: actions/setup-dotnet@v3
         with:
           dotnet-version: '8.0.x'
 
-      - name: Installeer MAUI workloads
+      - name: Install MAUI workloads
         run: dotnet workload install maui-android
 
-      - name: Build app
+      - name: Restore dependencies
+        run: dotnet restore
+
+      - name: Build Android app
         run: dotnet build Grocery.App/Grocery.App.csproj -f net8.0-android -c Release --no-restore
